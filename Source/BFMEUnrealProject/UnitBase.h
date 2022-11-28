@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Components/DecalComponent.h"
 #include "UnitBase.generated.h"
 
 UCLASS()
@@ -25,5 +26,14 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UFUNCTION(BlueprintCallable)
+	void Select(bool isSelected);
+
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class UDecalComponent* Decal;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool IsSelected;
 
 };

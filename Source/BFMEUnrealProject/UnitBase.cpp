@@ -8,7 +8,10 @@ AUnitBase::AUnitBase()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	
+	Decal = CreateDefaultSubobject<UDecalComponent>(TEXT("Decal"));
+	Decal->SetVisibility(false);
+	Decal->SetupAttachment(GetMesh());
 }
 
 // Called when the game starts or when spawned
@@ -32,3 +35,8 @@ void AUnitBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 }
 
+void AUnitBase::Select(bool isSelected)
+{
+	Decal->SetVisibility(isSelected);
+	IsSelected = isSelected;
+}
