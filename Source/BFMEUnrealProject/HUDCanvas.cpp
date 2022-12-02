@@ -38,13 +38,32 @@ void AHUDCanvas::StopSelection()
 
 	if (IsMarquee)
 	{
+		// Clear previous selection of units
 		AsRTSPlayerController->ClearUnitSelection();
+		SelectUnits();
+	}
+}
 
-		for (auto SelectedActor : SelectionOfActors)
+void AHUDCanvas::SelectUnits()
+{
+	TArray<FName> GroupsSelected;
+
+	for (auto SelectedActor : SelectionOfActors)
+	{
+		AUnitBase* Unit = Cast<AUnitBase>(SelectedActor);
+
+		if (Unit && Unit->GroupName != "")
 		{
-			AUnitBase* Unit = Cast<AUnitBase>(SelectedActor);
+			GroupsSelected.Add(Unit->GroupName);
+			UE_LOG(LogTemp, Error, TEXT(" ,Group name: %s, "), *Unit->GroupName.ToString());
+		}
+	}
 
-			if (Unit)
+	if (!GroupsSelected.IsEmpty())
+	{
+		for (AUnitBase* Unit : AsRTSPlayerController->UnitsAtStart)
+		{
+			if (GroupsSelected.Contains(Unit->GroupName))
 			{
 				AsRTSPlayerController->AddUnitToSelection(Unit);
 			}

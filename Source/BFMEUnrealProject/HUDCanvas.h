@@ -21,15 +21,18 @@ class BFMEUNREALPROJECT_API AHUDCanvas : public AHUD
 public:
 	void StartSelection();
 	void StopSelection();
+	void SelectUnits();
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void DrawHUD() override;
 
 public:
+	UPROPERTY()
 	ARTS_PlayerController* AsRTSPlayerController;
+	UPROPERTY()
+	TArray<AActor*> SelectionOfActors;
 	FVector2D PointA, PointB;
 	bool IsDrawing = false;
-	TArray<AActor*> SelectionOfActors;
 	bool IsMarquee = false;
 };

@@ -35,5 +35,7 @@ public:
 	class UDecalComponent* Decal;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool IsSelected;
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
+	FName GroupName;
 
 };

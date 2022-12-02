@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include <Delegates/Delegate.h>
 #include <Components/PrimitiveComponent.h>
+#include <Kismet/GameplayStatics.h>
 #include "RTS_PlayerController.generated.h"
 
 class AUnitBase;
@@ -32,9 +33,14 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 
+private:
+	void GetUnitsFromCurrentLevel();
+
 public:
 	UPROPERTY(BlueprintReadOnly)
 	TArray<AUnitBase*> UnitSelection;
+	UPROPERTY(BlueprintReadOnly)
+	TArray<AUnitBase*> UnitsAtStart;
 
 private:
 	AHUDCanvas* HUDCanvas;

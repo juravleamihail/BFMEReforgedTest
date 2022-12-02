@@ -10,6 +10,21 @@ void ARTS_PlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	HUDCanvas = Cast<AHUDCanvas>(GetHUD());
+	GetUnitsFromCurrentLevel();
+}
+
+void ARTS_PlayerController::GetUnitsFromCurrentLevel()
+{
+	TArray<AActor*> AllActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), AllActors);
+	for (AActor* Actor : AllActors)
+	{
+		AUnitBase* Unit = Cast<AUnitBase>(Actor);
+		if (Unit)
+		{
+			UnitsAtStart.Add(Unit);
+		}
+	}
 }
 
 void ARTS_PlayerController::SetupInputComponent()
