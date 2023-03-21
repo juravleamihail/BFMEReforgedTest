@@ -7,6 +7,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "BFMEUnrealProjectCharacter.h"
 #include "Engine/World.h"
+#include "UnitBase.h"
 
 ABFMEUnrealProjectPlayerController::ABFMEUnrealProjectPlayerController()
 {
