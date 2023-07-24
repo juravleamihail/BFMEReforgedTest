@@ -7,6 +7,7 @@
 #include <Delegates/Delegate.h>
 #include <Components/PrimitiveComponent.h>
 #include <Kismet/GameplayStatics.h>
+#include <../Plugins/FX/Niagara/Source/Niagara/Classes/NiagaraSystem.h>
 #include "RTS_PlayerController.generated.h"
 
 class AUnitBase;
@@ -33,15 +34,26 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 
+	/** Input handlers for SetDestination action. */
+	void OnSetDestinationPressed();
+	void OnSetDestinationReleased();
+	void AIStopMovement();
+
 private:
 	void GetUnitsFromCurrentLevel();
+	AUnitBase* GetClosestUnit(FVector& Location);
 
 public:
 	UPROPERTY(BlueprintReadOnly)
 	TArray<AUnitBase*> UnitSelection;
 	UPROPERTY(BlueprintReadOnly)
 	TArray<AUnitBase*> UnitsAtStart;
+	UPROPERTY(EditAnywhere)
+	float UnitSpacing = 32.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UNiagaraSystem* FXCursor;
 
 private:
 	AHUDCanvas* HUDCanvas;
+	bool bInputPressed; // Input is bring pressed
 };

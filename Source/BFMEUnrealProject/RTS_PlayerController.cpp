@@ -4,6 +4,8 @@
 #include "RTS_PlayerController.h"
 #include "UnitBase.h"
 #include "HUDCanvas.h"
+#include <../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h>
+#include <AIModule/Classes/Blueprint/AIBlueprintHelperLibrary.h>
 
 void ARTS_PlayerController::BeginPlay()
 {
@@ -31,8 +33,70 @@ void ARTS_PlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
+	InputComponent->BindAction("SetDestination", IE_Pressed, this, &ARTS_PlayerController::OnSetDestinationPressed);
+	InputComponent->BindAction("SetDestination", IE_Released, this, &ARTS_PlayerController::OnSetDestinationReleased);
+
 	InputComponent->BindAction("LeftClick", IE_Pressed, this, &ARTS_PlayerController::OnLeftClick_Pressed);
 	InputComponent->BindAction("LeftClick", IE_Released, this, &ARTS_PlayerController::OnLeftClicked_Released);
+}
+
+void ARTS_PlayerController::OnSetDestinationPressed()
+{
+	FHitResult Hit;
+	GetHitResultUnderCursor(ECC_Visibility, true, Hit);
+
+	
+	//TODO: make this a method
+	const int NumRows = 3;
+	const int NumCols = 3;
+
+	FVector GridCenter = Hit.Location;
+	
+	for (int i = 0; i < NumRows; i++)
+	{
+		for (int j = 0; j < NumCols; j++)
+		{
+			FVector UnitPosition = FVector(GridCenter.X + (j-NumCols/2) * UnitSpacing, GridCenter.Y + (i-NumRows/2)*UnitSpacing, Hit.Location.Z);
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, UnitPosition, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
+			UAIBlueprintHelperLibrary::SimpleMoveToLocation(GetClosestUnit(UnitPosition)->Controller, UnitPosition);
+		}
+	}
+}
+
+AUnitBase* ARTS_PlayerController::GetClosestUnit(FVector& Location)
+{
+	float ClosestDistance = 10000000;
+	AUnitBase* ClosestUnit = nullptr;
+
+	for (AUnitBase* Unit : UnitSelection)
+	{
+		float Distance = FVector::Distance(Unit->GetActorLocation(), Location);
+		if (Distance < ClosestDistance)
+		{
+			ClosestDistance = Distance;
+			ClosestUnit = Unit;
+		}
+	}
+
+	return ClosestUnit;
+}
+
+void ARTS_PlayerController::AIStopMovement()
+{
+	for (auto Unit : UnitSelection)
+	{
+		if (!Unit->Controller)
+		{
+			return;
+		}
+
+		Unit->GetController()->StopMovement();
+	}
+}
+
+void ARTS_PlayerController::OnSetDestinationReleased()
+{
+
 }
 
 void ARTS_PlayerController::AddUnitToSelection(AUnitBase* UnitBase)
