@@ -32,6 +32,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void PlayerTick(float DeltaTime) override;
 	virtual void SetupInputComponent() override;
 
 	/** Input handlers for SetDestination action. */
@@ -41,7 +42,7 @@ protected:
 
 private:
 	void GetUnitsFromCurrentLevel();
-	AUnitBase* GetClosestUnit(FVector& Location);
+	AUnitBase* GetFarthestUnit(FVector& Location, TArray<AUnitBase*>& Units);
 
 public:
 	UPROPERTY(BlueprintReadOnly)
@@ -52,8 +53,12 @@ public:
 	float UnitSpacing = 32.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UNiagaraSystem* FXCursor;
+	/** Time Threshold to know if it was a short press */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	float ShortPressThreshold;
 
 private:
 	AHUDCanvas* HUDCanvas;
 	bool bInputPressed; // Input is bring pressed
+	float FollowTime; // For how long it has been pressed
 };

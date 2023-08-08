@@ -40,45 +40,60 @@ void ARTS_PlayerController::SetupInputComponent()
 	InputComponent->BindAction("LeftClick", IE_Released, this, &ARTS_PlayerController::OnLeftClicked_Released);
 }
 
-void ARTS_PlayerController::OnSetDestinationPressed()
+void ARTS_PlayerController::PlayerTick(float DeltaTime)
 {
-	FHitResult Hit;
-	GetHitResultUnderCursor(ECC_Visibility, true, Hit);
+	Super::PlayerTick(DeltaTime);
 
-	
-	//TODO: make this a method
-	const int NumRows = 3;
-	const int NumCols = 3;
-
-	FVector GridCenter = Hit.Location;
-	
-	for (int i = 0; i < NumRows; i++)
+	if (bInputPressed)
 	{
-		for (int j = 0; j < NumCols; j++)
+		FollowTime += DeltaTime;
+
+		// Look for the touch location
+		FVector HitLocation = FVector::ZeroVector;
+		FHitResult Hit;
+
+		GetHitResultUnderCursor(ECC_Visibility, true, Hit);
+		HitLocation = Hit.Location;
+
+		// Direct the Pawn towards that location
+		APawn* const MyPawn = GetPawn();
+		if (MyPawn)
 		{
-			FVector UnitPosition = FVector(GridCenter.X + (j-NumCols/2) * UnitSpacing, GridCenter.Y + (i-NumRows/2)*UnitSpacing, Hit.Location.Z);
-			UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, UnitPosition, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
-			UAIBlueprintHelperLibrary::SimpleMoveToLocation(GetClosestUnit(UnitPosition)->Controller, UnitPosition);
+			FVector WorldDirection = (HitLocation - MyPawn->GetActorLocation()).GetSafeNormal();
+			MyPawn->AddMovementInput(WorldDirection, 1.f, false);
 		}
+	}
+	else
+	{
+		FollowTime = 0.f;
 	}
 }
 
-AUnitBase* ARTS_PlayerController::GetClosestUnit(FVector& Location)
+void ARTS_PlayerController::OnSetDestinationPressed()
 {
-	float ClosestDistance = 10000000;
-	AUnitBase* ClosestUnit = nullptr;
+	// We flag that the input is being pressed
+	bInputPressed = true;
+	// Just in case the character was moving because of a previous short press we stop it
+	StopMovement();
+}
 
-	for (AUnitBase* Unit : UnitSelection)
+AUnitBase* ARTS_PlayerController::GetFarthestUnit(FVector& Location, TArray<AUnitBase*>& Units)
+{
+	float FarthestDistance = 0;
+	AUnitBase* FarthestUnit = nullptr;
+
+	for (AUnitBase* Unit : Units)
 	{
 		float Distance = FVector::Distance(Unit->GetActorLocation(), Location);
-		if (Distance < ClosestDistance)
+		if (Distance > FarthestDistance)
 		{
-			ClosestDistance = Distance;
-			ClosestUnit = Unit;
+			FarthestDistance = Distance;
+			FarthestUnit = Unit;
 		}
 	}
 
-	return ClosestUnit;
+	Units.Remove(FarthestUnit);
+	return FarthestUnit;
 }
 
 void ARTS_PlayerController::AIStopMovement()
@@ -96,7 +111,38 @@ void ARTS_PlayerController::AIStopMovement()
 
 void ARTS_PlayerController::OnSetDestinationReleased()
 {
+	// Player is no longer pressing the input
+	bInputPressed = false;
 
+	// If it was a short press
+	if (FollowTime <= ShortPressThreshold)
+	{
+		FHitResult Hit;
+		GetHitResultUnderCursor(ECC_Visibility, true, Hit);
+
+		//TODO: make this a method
+		const int NumRows = FMath::CeilToInt(FMath::Sqrt(UnitSelection.Num()));
+		const int NumCols = FMath::CeilToInt(UnitSelection.Num() / static_cast<float>(NumRows));
+
+		FVector GridCenter = Hit.Location;
+		auto Units = UnitSelection;
+
+		for (int i = 0; i < NumRows; i++)
+		{
+			for (int j = 0; j < NumCols; j++)
+			{
+				FVector UnitPosition = FVector(GridCenter.X + (j - NumCols / 2) * UnitSpacing, GridCenter.Y + (i - NumRows / 2) * UnitSpacing, Hit.Location.Z);
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, UnitPosition, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
+
+				if (Units.IsEmpty())
+				{
+					return;
+				}
+
+				UAIBlueprintHelperLibrary::SimpleMoveToLocation(GetFarthestUnit(UnitPosition, Units)->Controller, UnitPosition);
+			}
+		}
+	}
 }
 
 void ARTS_PlayerController::AddUnitToSelection(AUnitBase* UnitBase)
