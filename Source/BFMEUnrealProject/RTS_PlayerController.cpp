@@ -96,6 +96,22 @@ AUnitBase* ARTS_PlayerController::GetFarthestUnit(FVector& Location, TArray<AUni
 	return FarthestUnit;
 }
 
+AUnitBase* ARTS_PlayerController::GetNextUnitByPrioritization(TArray<AUnitBase*>& Units)
+{
+	for (int i = 0; i <= MAX_PRIORITY_NUMBER; i++)
+	{
+		for (AUnitBase* Unit : Units)
+		{
+			if (Unit->PriorityNumber == i)
+			{
+				Units.Remove(Unit);
+				return Unit;
+			}
+		}
+	}
+	return nullptr;
+}
+
 void ARTS_PlayerController::AIStopMovement()
 {
 	for (auto Unit : UnitSelection)
@@ -126,6 +142,7 @@ void ARTS_PlayerController::OnSetDestinationReleased()
 
 		FVector GridCenter = Hit.Location;
 		auto Units = UnitSelection;
+		int32 CurrentPriorityNumber = 0;
 
 		for (int i = 0; i < NumRows; i++)
 		{
@@ -139,7 +156,14 @@ void ARTS_PlayerController::OnSetDestinationReleased()
 					return;
 				}
 
-				UAIBlueprintHelperLibrary::SimpleMoveToLocation(GetFarthestUnit(UnitPosition, Units)->Controller, UnitPosition);
+				AUnitBase* Unit = GetNextUnitByPrioritization(Units);
+
+				if (Unit == nullptr)
+				{
+					continue;
+				}
+
+				UAIBlueprintHelperLibrary::SimpleMoveToLocation(Unit->Controller, UnitPosition);
 			}
 		}
 	}

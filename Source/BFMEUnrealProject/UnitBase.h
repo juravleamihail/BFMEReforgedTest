@@ -36,6 +36,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool IsSelected;
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
-	FName GroupName;
+	FString GroupName;
+
+	//from 0 to MAX_PRIORITY_NUMBER (from RTS_PlayerController.h)
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
+	int32 PriorityNumber;
 
 };

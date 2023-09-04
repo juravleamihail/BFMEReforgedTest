@@ -43,6 +43,7 @@ protected:
 private:
 	void GetUnitsFromCurrentLevel();
 	AUnitBase* GetFarthestUnit(FVector& Location, TArray<AUnitBase*>& Units);
+	AUnitBase* GetNextUnitByPrioritization(TArray<AUnitBase*>& Units);
 
 public:
 	UPROPERTY(BlueprintReadOnly)
@@ -61,4 +62,5 @@ private:
 	AHUDCanvas* HUDCanvas;
 	bool bInputPressed; // Input is bring pressed
 	float FollowTime; // For how long it has been pressed
+	const int32 MAX_PRIORITY_NUMBER = 1;
 };

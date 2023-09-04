@@ -46,7 +46,7 @@ void AHUDCanvas::StopSelection()
 
 void AHUDCanvas::SelectUnits()
 {
-	TArray<FName> GroupsSelected;
+	TArray<FString> GroupsSelected;
 
 	for (auto SelectedActor : SelectionOfActors)
 	{
@@ -55,7 +55,7 @@ void AHUDCanvas::SelectUnits()
 		if (Unit && Unit->GroupName != "")
 		{
 			GroupsSelected.Add(Unit->GroupName);
-			UE_LOG(LogTemp, Error, TEXT(" ,Group name: %s, "), *Unit->GroupName.ToString());
+			UE_LOG(LogTemp, Error, TEXT(" ,Group name: %s, "), *Unit->GroupName);
 		}
 	}
 
